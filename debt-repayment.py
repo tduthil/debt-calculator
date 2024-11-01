@@ -197,7 +197,7 @@ def display_payoff_summary(total_months):
     summary_table = PrettyTable()
     summary_table.field_names = ["Total Time to Pay Off All Debts"]
     summary_table.add_row([f"{years} years, {months} months"])
-    st.write(summary_table)
+    st.write(summary_table)afdfasdf
 
 
 
@@ -228,7 +228,7 @@ def debt_repayment_calculator():
     if st.button("Calculate Repayment Plan"):
         print_initial_debts(debts)
         display_repayment_plan(debts, monthly_cash_flow, months_to_display)
-        
+
 
 if __name__ == "__main__":
     debt_repayment_calculator()
