@@ -6,6 +6,13 @@ from models import Debt
 from formatters import Formatter
 from typing import List, Dict
 
+def display_header(self):
+    """Displays the application header with custom styling."""
+    st.markdown('<div class="main-header">', unsafe_allow_html=True)
+    st.title("💰 Debt Repayment Calculator")
+    st.markdown("Track your path to financial freedom")
+    st.markdown('</div>', unsafe_allow_html=True)
+
 class DebtDisplay:
     def __init__(self):
         self.formatter = Formatter()

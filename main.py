@@ -16,6 +16,72 @@ st.set_page_config(
     layout="wide"
 )
 
+# Add custom CSS
+st.markdown("""
+    <style>
+        /* Primary color updates */
+        .stButton > button {
+            background-color: #782F40;
+            color: white;
+        }
+        .stButton > button:hover {
+            background-color: #8F3A4D;  /* Slightly lighter for hover */
+            color: white;
+        }
+        
+        /* Progress bars */
+        .stProgress > div > div {
+            background-color: #782F40;
+        }
+        
+        /* Slider */
+        .stSlider .slider-track {
+            background-color: rgba(120, 47, 64, 0.25);
+        }
+        .stSlider .slider-track .slider-track-selected {
+            background-color: #782F40;
+        }
+        
+        /* Metric color */
+        .metric-label {
+            color: #782F40 !important;
+        }
+        
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            color: #782F40;
+        }
+        
+        /* Form submission button */
+        .stFormSubmitButton > button {
+            background-color: #782F40;
+            color: white;
+        }
+        
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] button[data-baseweb="tab"] {
+            color: #782F40;
+        }
+        .stTabs [data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {
+            color: #782F40;
+            border-bottom-color: #782F40;
+        }
+        
+        /* Custom container for header */
+        .main-header {
+            padding: 1.5rem;
+            background-color: #782F40;
+            color: white;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .main-header h1 {
+            color: white !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 def initialize_session_state():
     """Initialize session state variables if they don't exist."""
     if 'submitted' not in st.session_state:
