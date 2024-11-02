@@ -22,7 +22,9 @@ class DebtDisplay:
             if payment['month'] == month:
                 month_data[payment['creditor']] = {
                     'balance': payment['balance'],
-                    'payment': payment['payment']
+                    'min_payment': payment['min_payment'],
+                    'additional_payment': payment['additional_payment'],
+                    'total_payment': payment['total_payment']
                 }
         return month_data
 
@@ -77,7 +79,7 @@ class DebtDisplay:
                     progress = ((original_balance - current_balance) / original_balance * 100)
                     
                     # Create columns for each piece of information
-                    cols = st.columns([3, 1, 1, 1])
+                    cols = st.columns([3, 1, 1, 1, 1])
                     with cols[0]:
                         st.progress(progress / 100)
                     with cols[1]:
@@ -86,6 +88,9 @@ class DebtDisplay:
                         st.write(f"{round(progress, 1)}%")
                     with cols[3]:
                         st.write(self.formatter.format_currency(current_balance))
+                    with cols[4]:
+                        monthly_payment = month_data[debt.creditor]['total_payment']
+                        st.write(f"Payment: {self.formatter.format_currency(monthly_payment)}")
 
     def display_payment_schedule(self, payment_schedule: List[Dict]):
         """Displays the monthly payment schedule."""
@@ -104,7 +109,7 @@ class DebtDisplay:
                 x=alt.X('month:Q', title='Month'),
                 y=alt.Y('balance:Q', title='Balance ($)'),
                 color=alt.Color('creditor:N', title='Creditor'),
-                tooltip=['month', 'creditor', 'payment', 'balance']
+                tooltip=['month', 'creditor', 'total_payment', 'balance']
             ).properties(
                 width=700,
                 height=400,
@@ -120,8 +125,16 @@ class DebtDisplay:
                 column_config={
                     "month": "Month",
                     "creditor": "Creditor",
-                    "payment": st.column_config.NumberColumn(
-                        "Payment",
+                    "min_payment": st.column_config.NumberColumn(
+                        "Minimum Payment",
+                        format="$%.2f"
+                    ),
+                    "additional_payment": st.column_config.NumberColumn(
+                        "Additional Payment",
+                        format="$%.2f"
+                    ),
+                    "total_payment": st.column_config.NumberColumn(
+                        "Total Payment",
                         format="$%.2f"
                     ),
                     "balance": st.column_config.NumberColumn(
@@ -129,7 +142,7 @@ class DebtDisplay:
                         format="$%.2f"
                     ),
                     "cash_flow_used": st.column_config.NumberColumn(
-                        "Cash Flow Used",
+                        "Additional Cash Flow Used",
                         format="$%.2f"
                     ),
                     "remaining_cash_flow": st.column_config.NumberColumn(

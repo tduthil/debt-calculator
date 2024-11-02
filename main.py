@@ -128,7 +128,7 @@ def main():
         # Add a reset button
         if st.button("Reset Calculator"):
             reset_calculation()
-            st.experimental_rerun()
+            st.rerun()  # Updated from experimental_rerun() to rerun()
 
 if __name__ == "__main__":
     main()
