@@ -1,4 +1,6 @@
 # validators.py
+from typing import Tuple
+
 class InputValidator:
     @staticmethod
     def validate_creditor(creditor: str) -> bool:
@@ -23,3 +25,4 @@ class InputValidator:
         if not InputValidator.validate_min_payment(min_payment, balance):
             return False, "Invalid minimum payment amount"
         return True, ""
+

@@ -1,34 +1,71 @@
 # main.py
+import streamlit as st
+from models import Debt
+from validators import InputValidator
+from formatters import Formatter
+from calculator import DebtCalculator
+from display import DebtDisplay
+from input_handler import DebtInputHandler
+from typing import List, Dict
+import copy
+
+# Set page config at the very top
+st.set_page_config(
+    page_title="Debt Repayment Calculator",
+    page_icon="💰",
+    layout="wide"
+)
+
+def initialize_session_state():
+    """Initialize session state variables if they don't exist."""
+    if 'submitted' not in st.session_state:
+        st.session_state.submitted = False
+    if 'calculation_complete' not in st.session_state:
+        st.session_state.calculation_complete = False
+    if 'original_debts' not in st.session_state:
+        st.session_state.original_debts = []
+    if 'payment_schedule' not in st.session_state:
+        st.session_state.payment_schedule = []
+
+def reset_calculation():
+    """Reset calculation-related session state variables."""
+    st.session_state.submitted = False
+    st.session_state.calculation_complete = False
+    st.session_state.original_debts = []
+    st.session_state.payment_schedule = []
+
 def main():
-    st.set_page_config(
-        page_title="Debt Repayment Calculator",
-        page_icon="💰",
-        layout="wide"
-    )
+    initialize_session_state()
     
-    st.title("Debt Repayment Calculator")
-    
+    # Initialize components
     input_handler = DebtInputHandler()
-    calculator = DebtCalculator()
     display = DebtDisplay()
+    calculator = DebtCalculator()
     
+    # Display header
+    display.display_header()
+    
+    # Input Section
     with st.form(key="debt_calculator_form"):
         st.subheader("Enter Your Financial Information")
         
-        monthly_cash_flow = st.number_input(
-            "Monthly cash flow available for debt repayment:",
-            min_value=0.0,
-            step=0.01,
-            help="Amount available each month beyond minimum payments"
-        )
+        col1, col2 = st.columns(2)
+        with col1:
+            monthly_cash_flow = st.number_input(
+                "Monthly cash flow available for debt repayment:",
+                min_value=0.0,
+                step=0.01,
+                help="Amount available each month beyond minimum payments"
+            )
         
-        months_to_display = st.number_input(
-            "Number of months to display in repayment plan:",
-            min_value=1,
-            value=12,
-            step=1,
-            help="How many months of the repayment plan you want to see"
-        )
+        with col2:
+            months_to_display = st.number_input(
+                "Maximum months to calculate:",
+                min_value=1,
+                value=60,
+                step=1,
+                help="Maximum number of months to calculate the repayment plan"
+            )
         
         creditor_count = st.number_input(
             "Number of creditors:",
@@ -40,23 +77,58 @@ def main():
         
         # Collect debt inputs
         debts = []
+        has_errors = False
+        
         for i in range(int(creditor_count)):
             st.write(f"### Debt {i + 1}")
             creditor, balance, limit, min_payment = input_handler.collect_debt_inputs(i)
+            
             is_valid, error_message = InputValidator.validate_debt_input(
                 creditor, balance, limit, min_payment
             )
+            
             if not is_valid:
                 st.error(f"Debt {i + 1}: {error_message}")
+                has_errors = True
             else:
                 debts.append(Debt.create(creditor, balance, limit, min_payment))
         
         submit_button = st.form_submit_button(label="Calculate Repayment Plan")
+        
+        if submit_button:
+            st.session_state.submitted = True
+            if not has_errors and debts:  # Make sure we have valid debts
+                # Store original debts for progress tracking
+                st.session_state.original_debts = copy.deepcopy(debts)
+                
+                # Calculate repayment schedule
+                payment_schedule, total_months = calculator.calculate_repayment_schedule(
+                    debts,
+                    monthly_cash_flow,
+                    months_to_display
+                )
+                
+                st.session_state.payment_schedule = payment_schedule
+                st.session_state.total_months = total_months
+                st.session_state.calculation_complete = True
+            elif has_errors:
+                st.error("Please fix the errors before calculating the repayment plan.")
+            elif not debts:
+                st.error("Please enter at least one debt.")
     
-    if submit_button and debts:
-        display.display_initial_debts(debts)
-        sorted_debts = calculator.sort_debts_by_priority(debts)
-        # Continue with repayment calculation and display...
+    # Display results if calculation is complete
+    if st.session_state.calculation_complete:
+        display.display_repayment_plan(
+            debts,
+            st.session_state.original_debts,
+            st.session_state.payment_schedule,
+            st.session_state.total_months
+        )
+        
+        # Add a reset button
+        if st.button("Reset Calculator"):
+            reset_calculation()
+            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()

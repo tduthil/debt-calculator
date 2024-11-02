@@ -1,4 +1,10 @@
 # input_handler.py
+from typing import Tuple
+# Import necessary libraries and modules
+import streamlit as st
+from validators import InputValidator  # Import InputValidator
+
+# input_handler.py
 class DebtInputHandler:
     def __init__(self):
         self.validator = InputValidator()
